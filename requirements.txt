@@ -1,0 +1,6 @@
+# Dependencies for Yahboom Competition Robot with Whisper Speech Recognition
+numpy>=1.21.0
+scipy>=1.7.0
+sounddevice>=0.4.4
+openai-whisper>=20230314
+pyttsx3>=2.90
