@@ -48,8 +48,15 @@ WRC/
 - **Features**: Direct Whisper usage for testing and development
 
 ### `second_task.py`
-- **Purpose**: Extended competition tasks
-- **Features**: Additional autonomous behaviors and task execution
+- **Purpose**: Autonomous tool retrieval and collaboration phase
+- **Features**:
+  - Navigation to tool cabin and collection areas
+  - Arm and gripper control for item pickup and placement
+  - Computer vision (OpenCV, cv_bridge) for object detection
+  - Collaboration with other robots (greeting, standby point selection)
+  - Advanced speech recognition and TTS
+  - Flexible task parsing and execution
+- **Class**: `YahboomAutonomousCollaborationRobot`
 
 ## 🛠️ Setup and Installation
 
@@ -73,6 +80,18 @@ pip install -r requirements.txt
 - `sounddevice>=0.4.4`: Real-time audio recording
 - `openai-whisper>=20230314`: AI speech recognition
 - `pyttsx3>=2.90`: Text-to-speech synthesis
+
+### Additional Dependencies for second_task.py
+- `opencv-python`: Computer vision for object detection
+- `cv_bridge`: ROS-Python bridge for image messages
+- `sensor_msgs`: ROS image message types
+- `numpy`, `scipy`, `sounddevice`, `openai-whisper`, `pyttsx3` (already listed)
+
+Install OpenCV and cv_bridge:
+```bash
+pip install opencv-python
+sudo apt install ros-noetic-cv-bridge ros-noetic-sensor-msgs
+```
 
 ### ROS Dependencies
 Ensure these ROS packages are installed:
@@ -117,7 +136,7 @@ python3 Speech-to-text.py
 
 ## 🎯 Competition Tasks
 
-### Phase 1: Human Interaction
+### Phase 1: Human Interaction (Init.py)
 1. **Navigation**: Robot moves from starting area to working cabin
 2. **Approach**: Enter the working cabin safely
 3. **Interaction**: Greet human and ask for assistance needs
@@ -125,11 +144,12 @@ python3 Speech-to-text.py
 5. **Confirmation**: Repeat back the understood request
 6. **Scoring**: Points awarded for successful completion
 
-### Phase 2: Task Execution
-- Navigate to tool cabin
-- Retrieve requested items
-- Return and deliver to human
-- Complete autonomous behaviors
+### Phase 2: Task Execution & Collaboration (second_task.py)
+- **Autonomous Tool Retrieval**: Navigate to tool cabin, detect and pick up items, deliver to target area
+- **Collaboration**: Greet other robot, receive standby instructions, navigate to standby point
+- **Computer Vision**: Detect items by color/shape using OpenCV
+- **Arm/Gripper Control**: Pick/place items using Yahboom arm
+- **Speech Recognition**: Use Whisper for instructions
 
 ## 🔧 Configuration
 
@@ -154,6 +174,27 @@ locations = {
 }
 ```
 
+### Additional Configuration for second_task.py
+```python
+# In second_task.py
+self.arm_positions = {
+    'home': [90, 135, 20, 20, 90, 30],
+    'pick_up': [90, 100, 50, 50, 90, 30],
+    'carry': [90, 135, 45, 45, 90, 30],
+    'place': [90, 120, 40, 40, 90, 30]
+}
+
+# Item database for object recognition
+self.item_database = {
+    'red_flask': {'color': [0, 0, 255], 'shape': 'flask', 'size': 'medium'},
+    'blue_flask': {'color': [255, 0, 0], 'shape': 'flask', 'size': 'medium'},
+    'green_flask': {'color': [0, 255, 0], 'shape': 'flask', 'size': 'medium'},
+    'pipeline_parts_box': {'color': [128, 128, 128], 'shape': 'box', 'size': 'large'},
+    'aviation_oil_bottle': {'color': [255, 255, 0], 'shape': 'bottle', 'size': 'medium'},
+    'gloves': {'color': [255, 255, 255], 'shape': 'irregular', 'size': 'small'}
+}
+```
+
 ## 📊 ROS Topics
 
 ### Published Topics
@@ -167,6 +208,12 @@ locations = {
 - `/move_base/result`: Navigation results
 - `/scan`: Laser sensor data (if used)
 - `/camera/image_raw`: Camera feed (if used)
+
+### Additional Topics for second_task.py
+- `/usb_cam/image_raw`: Raw camera images for vision
+- `/TargetAngle`: Arm joint control
+- `/Gripper`: Gripper control
+- `/collaboration_ready`: Collaboration phase status
 
 ## 🐛 Troubleshooting
 
@@ -213,6 +260,9 @@ python3 -c "import whisper; print('Whisper available')"
 - **Safety Features**: Emergency stop and collision avoidance
 - **Real-time Feedback**: Visual and audio status indicators
 - **Configurable Parameters**: Easy venue-specific adjustments
+- **Computer Vision**: Detect and manipulate objects using OpenCV and ROS image topics
+- **Multi-Phase Tasks**: Seamless transition from autonomous to collaboration phase
+- **Flexible Item Parsing**: Understand and act on a variety of human requests
 
 ## 👥 Development Team
 
